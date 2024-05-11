@@ -86,3 +86,81 @@ declare function $tuple<T extends Array<any>>(...values: T): LuaTuple<T>;
  * ```
  */
 declare function $getModuleTree(module: string): [root: Instance, parts: Array<string>];
+
+/**
+ * Returns the time at which this file was compiled, in unix timestamp.
+ */
+declare function $compileTime(): number;
+
+// Explanation for the next methods
+/* In lua:
+`Record<K, V>` (any object) is represented as a table with keys K and values V
+`Map<K, V>` is represented exactly the same as Record<K, V>
+`Set<V>` is represented as a table with keys V and values `true`
+`V[]` is represented as a table with keys `number` and values V
+
+Or, simpler,
+`Map<K, V>` = `Record<K, V>`
+`Set<V>` = `Record<V, true>`
+`V[]` = `Record<number, V>`
+
+So we can safely (excluding the 1-based array indexing shenanigans) convert between them to use methods from other types
+*/
+
+declare function asObject<V>(map: ReadonlyArray<V>): object & Readonly<Record<number, V>>;
+declare function asObject<V>(map: Array<V>): object & Record<number, V>;
+
+declare function asObject<V extends string | number | symbol>(map: Set<V>): object & Record<V, true>;
+declare function asObject<V extends string | number | symbol>(map: ReadonlySet<V>): object & Readonly<Record<V, true>>;
+
+declare function asObject<K extends string | number | symbol, V>(map: Map<K, V>): object & Record<K, V>;
+declare function asObject<K extends string | number | symbol, V>(
+	map: ReadonlyMap<K, V>,
+): object & Readonly<Record<K, V>>;
+
+declare function asObject<K extends string | number | symbol, V>(
+	map: ReadonlyMap<K, V> | ReadonlySet<V> | ReadonlyArray<V>,
+): object & Record<K, V>;
+
+declare function asMap<V>(object: Array<V>): Map<number, V & defined>;
+declare function asMap<V>(object: ReadonlyArray<V>): ReadonlyMap<number, V & defined>;
+
+declare function asMap<V extends defined>(object: Set<V>): Map<V, true>;
+declare function asMap<V extends defined>(object: ReadonlySet<V>): ReadonlyMap<V, true>;
+
+declare function asMap<T extends object>(object: T): Map<keyof T, T[keyof T] & defined>;
+declare function asMap<T extends object>(object: T): ReadonlyMap<keyof T, T[keyof T] & defined>;
+
+declare function asMap<K extends string | number | symbol, V>(
+	object: (object & Readonly<Record<K, V>>) | ReadonlySet<V> | ReadonlyArray<V>,
+): Map<K, V>;
+
+//
+
+declare function asSet(object: Array<true>): Set<number>;
+declare function asSet(object: ReadonlyArray<true>): ReadonlySet<number>;
+
+declare function asSet<K extends defined>(object: Map<K, true>): Set<K>;
+declare function asSet<K extends defined>(object: ReadonlyMap<K, true>): ReadonlySet<K>;
+
+declare function asSet<K extends string | number | symbol>(object: object & Record<K, true>): Set<K>;
+declare function asSet<K extends string | number | symbol>(object: object & Readonly<Record<K, true>>): ReadonlySet<K>;
+
+declare function asSet<K extends string | number | symbol>(
+	object: (object & Readonly<Record<K, true>>) | ReadonlyMap<K, true> | ReadonlyArray<true>,
+): Set<K>;
+
+//
+
+declare function asArray(object: Set<number>): Array<true>;
+declare function asArray(object: ReadonlySet<number>): ReadonlyArray<true>;
+
+declare function asArray<V>(object: Map<number, V>): Array<V>;
+declare function asArray<V>(object: ReadonlyMap<number, V>): ReadonlyArray<V>;
+
+declare function asArray<V>(object: object & Record<number, V>): Array<V>;
+declare function asArray<V>(object: object & Readonly<Record<number, V>>): ReadonlyArray<V>;
+
+declare function asArray<K extends string | number | symbol, V>(
+	object: (object & Readonly<Record<K, V>>) | ReadonlyMap<K, V> | ReadonlySet<V>,
+): Array<V>;
