@@ -124,3 +124,7 @@ type ExcludeNominalMembers<T> = Pick<T, ExcludeNominalKeys<T>>;
 
 /** Unwraps a Promise<T> */
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
+
+type PropertyMacros<TType> = {
+	readonly [k in Exclude<keyof TType, number>]?: (obj: TType, ...args: Parameters<TType[k]>) => ReturnType<TType[k]>;
+};
