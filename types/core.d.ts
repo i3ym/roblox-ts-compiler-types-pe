@@ -102,6 +102,17 @@ interface Function {
 	 * @deprecated
 	 */
 	prototype: never;
+
+	/** Reinterpret the provided function as an arrow function, mapping `this` to a parameter */
+	asArrow<TThis extends defined, TArgs extends unknown[], TRet>(
+		this: (this: TThis, ...args: TArgs) => TRet,
+	): (self: TThis, ...args: TArgs) => TRet;
+
+	/** Bind the function `this` parameter */
+	bind<TThis extends defined, TArgs extends unknown[], TRet>(
+		this: (this: TThis, ...args: TArgs) => TRet,
+		selv: TThis,
+	): (...args: TArgs) => TRet;
 }
 
 /**
